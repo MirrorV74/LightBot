@@ -2,7 +2,7 @@
 
 char[,] FieldCreation()
 {
-    StreamReader reader = new StreamReader("1level.txt");
+    StreamReader reader = new StreamReader("level1.txt");
 
     int cols = int.Parse(reader.ReadLine());
     int rows = int.Parse(reader.ReadLine());
@@ -28,6 +28,18 @@ void PrintField(char[,] field)
     {
         for (int j = 0; j < field.GetLength(1); j++)
         {
+            switch (field[i,j])
+            {
+                case 'a':
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                case 'o':
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    break;
+                case 'X':
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+            }
             Console.Write(field[i, j]);
         }
         Console.WriteLine();
@@ -91,9 +103,8 @@ int[] FindPlayer(char[,] field)
 void PlayMoves(char[] moves, char[,] field)
 {
     int[] playerCoordinates = FindPlayer(field);
-    int playerX = playerCoordinates[0];
-    int playerY = playerCoordinates[1];
-    field[playerX, playerY] = 'a';
+    int playerY = playerCoordinates[0];
+    int playerX = playerCoordinates[1];
     bool allowedCombination = true;
     for (int i = 0; i < moves.Length && allowedCombination; i++)
     {
@@ -103,6 +114,7 @@ void PlayMoves(char[] moves, char[,] field)
             {
                 if (playerY != 0)
                 {
+                    field[playerY, playerX] = 'a';
                     playerY--;
                 }
                 else
@@ -116,6 +128,7 @@ void PlayMoves(char[] moves, char[,] field)
             {
                 if (playerX != 0)
                 {
+                    field[playerY, playerX] = 'a';
                     playerX--;
                 }
                 else
@@ -127,8 +140,9 @@ void PlayMoves(char[] moves, char[,] field)
             }
             case 's':
             {
-                if (playerY != field.GetLength(1))
+                if (playerY != field.GetLength(0)-1)
                 {
+                    field[playerY, playerX] = 'a';
                     playerY++;
                 }
                 else
@@ -140,8 +154,9 @@ void PlayMoves(char[] moves, char[,] field)
             }
             case 'd':
             {
-                if (playerX != field.GetLength(0))
+                if (playerX != field.GetLength(1)-1)
                 {
+                    field[playerY, playerX] = 'a';
                     playerX++;
                 }
                 else
@@ -158,8 +173,14 @@ void PlayMoves(char[] moves, char[,] field)
                 break;
             }
         }
-        field[playerX, playerY] = 'X';
-        PrintField(field);
+
+        if (allowedCombination)
+        {
+            Thread.Sleep(300);
+            field[playerY, playerX] = 'X';
+            Console.Clear();
+            PrintField(field);
+        }
     }
 }
 
