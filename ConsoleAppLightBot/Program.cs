@@ -1,25 +1,25 @@
 ﻿using System.Diagnostics;
 
-char[,] FieldCreation()
+char[,] ReedLevel()
 {
     StreamReader reader = new StreamReader("level1.txt");
 
     int cols = int.Parse(reader.ReadLine());
     int rows = int.Parse(reader.ReadLine());
 
-    char[,] fieldLVL1 = new char[cols, rows];
-    for (int i = 0; i < fieldLVL1.GetLength(0); i++)
+    char[,] field = new char[cols, rows];
+    for (int i = 0; i < field.GetLength(0); i++)
     {
         char[] strfield = reader.ReadLine().ToCharArray();
         for (int j = 0; j < strfield.Length; j++)
         {
-            fieldLVL1[i, j] = strfield[j];
+            field[i, j] = strfield[j];
         }
     }
 
     reader.Close();
 
-    return fieldLVL1;
+    return field;
 }
 
 void PrintField(char[,] field)
@@ -100,12 +100,13 @@ int[] FindPlayer(char[,] field)
     return playerCoordinates;
 }
 
-void PlayMoves(char[] moves, char[,] field)
+bool PlayMoves(char[] moves, char[,] field)
 {
     int[] playerCoordinates = FindPlayer(field);
     int playerY = playerCoordinates[0];
     int playerX = playerCoordinates[1];
     bool allowedCombination = true;
+    bool levelCompleted = false;
     for (int i = 0; i < moves.Length && allowedCombination; i++)
     {
         switch (moves[i])
@@ -182,8 +183,21 @@ void PlayMoves(char[] moves, char[,] field)
             PrintField(field);
         }
     }
+
+    if (field[playerX,playerY] == 'P')
+    {
+        levelCompleted = true;
+    }
+    return levelCompleted;
 }
 
-char[,] field = FieldCreation();
-char[] moves = ReadMoves();
-PlayMoves(moves, field);
+char[,] field = ReedLevel();
+bool levelCompleted = false;
+while (!levelCompleted)
+{
+    Console.Clear();
+    char[] moves = ReadMoves();
+    levelCompleted =  PlayMoves(moves, field);
+}
+
+
