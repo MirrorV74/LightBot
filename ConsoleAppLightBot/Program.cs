@@ -1,8 +1,12 @@
 ﻿using System.Diagnostics;
+using ConsoleAppLightBot;
 
 char[,] ReedLevel()
 {
-    StreamReader reader = new StreamReader("level1.txt");
+    Console.WriteLine("Input name of file that contains level");
+    string levelName = Console.ReadLine();
+    
+    StreamReader reader = new StreamReader($"{levelName}");
 
     int cols = int.Parse(reader.ReadLine());
     int rows = int.Parse(reader.ReadLine());
@@ -22,6 +26,22 @@ char[,] ReedLevel()
     return field;
 }
 
+bool AnotherOne()
+{
+    bool inGame = true;
+    Console.WriteLine("You won!");
+    Console.WriteLine("Wanna play again");
+    Console.WriteLine("1. Yes");
+    Console.WriteLine("2. No");
+    int answer = int.Parse(Console.ReadLine());
+    if (answer == 2)
+    {
+        inGame = false;
+    }
+    
+    return inGame;
+}
+
 void PrintField(char[,] field)
 {
     for (int i = 0; i < field.GetLength(0); i++)
@@ -30,14 +50,20 @@ void PrintField(char[,] field)
         {
             switch (field[i,j])
             {
-                case 'a':
+                case Tile.Trail:
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     break;
-                case 'o':
+                case Tile.Empty:
                     Console.ForegroundColor = ConsoleColor.Green;
                     break;
-                case 'X':
+                case Tile.Player:
                     Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case Tile.Wall:
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+                case Tile.Portal:
+                    Console.ForegroundColor = ConsoleColor.Blue;
                     break;
             }
             Console.Write(field[i, j]);
@@ -90,7 +116,7 @@ int[] FindPlayer(char[,] field)
     {
         for (int j = 0; j < field.GetLength(1); j++)
         {
-            if (field[i,j] == 'X')
+            if (field[i,j] == Tile.Player)
             {
                 playerCoordinates[0] = i;
                 playerCoordinates[1] = j;
@@ -115,8 +141,21 @@ bool PlayMoves(char[] moves, char[,] field)
             {
                 if (playerY != 0)
                 {
-                    field[playerY, playerX] = 'a';
                     playerY--;
+                    switch (field[playerY,playerX])
+                    {
+                        case Tile.Trail:
+                        case Tile.Empty:
+                        {
+                            field[playerY+1, playerX] = Tile.Trail;
+                            break;
+                        }
+                        case Tile.Wall:
+                        {
+                            playerY++;
+                            break;
+                        }
+                    }
                 }
                 else
                 {
@@ -129,8 +168,21 @@ bool PlayMoves(char[] moves, char[,] field)
             {
                 if (playerX != 0)
                 {
-                    field[playerY, playerX] = 'a';
                     playerX--;
+                    switch (field[playerY,playerX])
+                    {
+                        case Tile.Trail:
+                        case Tile.Empty:
+                        {
+                            field[playerY, playerX+1] = Tile.Trail;
+                            break;
+                        }
+                        case Tile.Wall:
+                        {
+                            playerX++;
+                            break;
+                        }
+                    }
                 }
                 else
                 {
@@ -143,8 +195,21 @@ bool PlayMoves(char[] moves, char[,] field)
             {
                 if (playerY != field.GetLength(0)-1)
                 {
-                    field[playerY, playerX] = 'a';
                     playerY++;
+                    switch (field[playerY,playerX])
+                    {
+                        case Tile.Trail:
+                        case Tile.Empty:
+                        {
+                            field[playerY-1, playerX] = Tile.Trail;
+                            break;
+                        }
+                        case Tile.Wall:
+                        {
+                            playerY--;
+                            break;
+                        }
+                    }
                 }
                 else
                 {
@@ -157,8 +222,21 @@ bool PlayMoves(char[] moves, char[,] field)
             {
                 if (playerX != field.GetLength(1)-1)
                 {
-                    field[playerY, playerX] = 'a';
                     playerX++;
+                    switch (field[playerY,playerX])
+                    {
+                        case Tile.Trail:
+                        case Tile.Empty:
+                        {
+                            field[playerY, playerX-1] = Tile.Trail;
+                            break;
+                        }
+                        case Tile.Wall:
+                        {
+                            playerX--;
+                            break;
+                        }
+                    }
                 }
                 else
                 {
@@ -178,26 +256,33 @@ bool PlayMoves(char[] moves, char[,] field)
         if (allowedCombination)
         {
             Thread.Sleep(300);
-            field[playerY, playerX] = 'X';
+            field[playerY, playerX] = Tile.Player;
             Console.Clear();
             PrintField(field);
         }
     }
 
-    if (field[playerX,playerY] == 'P')
+    if (field[playerX,playerY] == Tile.Portal)
     {
         levelCompleted = true;
     }
     return levelCompleted;
 }
 
-char[,] field = ReedLevel();
-bool levelCompleted = false;
-while (!levelCompleted)
+bool inGame = true;
+do
 {
-    Console.Clear();
-    char[] moves = ReadMoves();
-    levelCompleted =  PlayMoves(moves, field);
-}
+    char[,] field = ReedLevel();
+    bool levelCompleted = false;
+    while (!levelCompleted)
+    {
+        Console.Clear();
+        PrintField(field);
+        char[] moves = ReadMoves();
+        levelCompleted =  PlayMoves(moves, field);
+    }
+    inGame = AnotherOne();
+} while (inGame);
+
 
 
