@@ -1,6 +1,7 @@
-﻿using System.Diagnostics;
+﻿
+using ConsoleAppLightBot;
 
-char[,] ReedLevel()
+char[,] ReadLevel()
 {
     StreamReader reader = new StreamReader("level1.txt");
 
@@ -28,25 +29,36 @@ void PrintField(char[,] field)
     {
         for (int j = 0; j < field.GetLength(1); j++)
         {
-            switch (field[i,j])
+            switch (field[i, j])
             {
-                case 'a':
+                case Tile.Trail:
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     break;
-                case 'o':
+                case Tile.Empty:
                     Console.ForegroundColor = ConsoleColor.Green;
                     break;
-                case 'X':
+                case Tile.Player:
                     Console.ForegroundColor = ConsoleColor.Red;
                     break;
+                case Tile.Pit:
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    break;
+                case Tile.Portal:
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+                case Tile.Wall:
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    break;
             }
+
             Console.Write(field[i, j]);
         }
+
         Console.WriteLine();
     }
 }
 
-char[] ReadMoves() 
+char[] ReadMoves()
 {
     Console.WriteLine("Choose type of imput:");
     Console.WriteLine("1. From file");
@@ -60,11 +72,11 @@ char[] ReadMoves()
         {
             Console.WriteLine("Write file name");
             string file = Console.ReadLine();
-            
+
             StreamReader reader = new StreamReader($"{file}");
             moves = reader.ReadLine().ToCharArray();
             reader.Close();
-            
+
             break;
         }
         case 2:
@@ -79,7 +91,7 @@ char[] ReadMoves()
             break;
         }
     }
-    
+
     return moves;
 }
 
@@ -90,13 +102,14 @@ int[] FindPlayer(char[,] field)
     {
         for (int j = 0; j < field.GetLength(1); j++)
         {
-            if (field[i,j] == 'X')
+            if (field[i, j] == Tile.Player)
             {
                 playerCoordinates[0] = i;
                 playerCoordinates[1] = j;
             }
         }
     }
+
     return playerCoordinates;
 }
 
@@ -106,7 +119,9 @@ bool PlayMoves(char[] moves, char[,] field)
     int playerY = playerCoordinates[0];
     int playerX = playerCoordinates[1];
     bool allowedCombination = true;
-    bool levelCompleted = false;
+    bool levelIsCompleted = false;
+    string exception = "0";
+    
     for (int i = 0; i < moves.Length && allowedCombination; i++)
     {
         switch (moves[i])
@@ -115,54 +130,126 @@ bool PlayMoves(char[] moves, char[,] field)
             {
                 if (playerY != 0)
                 {
-                    field[playerY, playerX] = 'a';
-                    playerY--;
+                    switch (field[playerY, playerX])
+                    {
+                        case Tile.Empty:
+                        case Tile.Trail:
+                        {
+                            field[playerY, playerX] = Tile.Empty;
+                            playerY--;
+                            break;
+                        }
+                        case Tile.Wall:
+                        {
+                            break;
+                        }
+                        case Tile.Pit:
+                        {
+                            exception= "Fell into pit";
+                            Console.WriteLine("You fell into the pit.");
+                            break;
+                        }
+                    }
                 }
                 else
                 {
-                    allowedCombination = false;
+                    exception = "Impossible movement";
                     Console.WriteLine("Impossible movement");
                 }
                 break;
             }
             case 'a':
             {
-                if (playerX != 0)
+                if (playerY != 0)
                 {
-                    field[playerY, playerX] = 'a';
-                    playerX--;
+                    switch (field[playerY, playerX])
+                    {
+                        case Tile.Empty:
+                        case Tile.Trail:
+                        {
+                            field[playerY, playerX] = Tile.Empty;
+                            playerX--;
+                            break;
+                        }
+                        case Tile.Wall:
+                        {
+                            break;
+                        }
+                        case Tile.Pit:
+                        {
+                            exception= "Fell into pit";
+                            Console.WriteLine("You fell into the pit.");
+                            break;
+                        }
+                    }
                 }
                 else
                 {
-                    allowedCombination = false;
+                    exception = "Impossible movement";
                     Console.WriteLine("Impossible movement");
                 }
                 break;
             }
             case 's':
             {
-                if (playerY != field.GetLength(0)-1)
+                if (playerY != field.GetLength(0) - 1)
                 {
-                    field[playerY, playerX] = 'a';
-                    playerY++;
+                    switch (field[playerY, playerX])
+                    {
+                        case Tile.Trail:
+                        case Tile.Empty:
+                        {
+                            field[playerY, playerX] = Tile.Empty;
+                            playerY++;
+                            break;
+                        }
+                        case Tile.Wall:
+                        {
+                            break;
+                        }
+                        case Tile.Pit:
+                        {
+                            exception= "Fell into pit";
+                            Console.WriteLine("You fell into the pit.");
+                            break;
+                        }
+                    }
                 }
                 else
                 {
-                    allowedCombination = false;
+                    exception = "Impossible movement";
                     Console.WriteLine("Impossible movement");
                 }
                 break;
             }
             case 'd':
             {
-                if (playerX != field.GetLength(1)-1)
+                if (playerY != field.GetLength(1) - 1)
                 {
-                    field[playerY, playerX] = 'a';
-                    playerX++;
+                    switch (field[playerY, playerX])
+                    {
+                        case Tile.Empty:
+                        case Tile.Trail:
+                        {
+                            field[playerY, playerX] = Tile.Empty;
+                            playerX++;
+                            break;
+                        }
+                        case Tile.Wall:
+                        {
+                            break;
+                        }
+                        case Tile.Pit:
+                        {
+                            exception= "Fell into pit";
+                            Console.WriteLine("You fell into the pit.");
+                            break;
+                        }
+                    }
                 }
                 else
                 {
-                    allowedCombination = false;
+                    exception = "Impossible movement";
                     Console.WriteLine("Impossible movement");
                 }
                 break;
@@ -173,31 +260,44 @@ bool PlayMoves(char[] moves, char[,] field)
                 Console.WriteLine("Incorrect input");
                 break;
             }
+                
         }
-
-        if (allowedCombination)
+        switch (exception)
         {
-            Thread.Sleep(300);
-            field[playerY, playerX] = 'X';
-            Console.Clear();
-            PrintField(field);
+            case "0":
+            {
+                Thread.Sleep(300);
+                field[playerY, playerX] = Tile.Player;
+                Console.Clear();
+                PrintField(field);
+                break;
+            }
+            case "Fell into pit":
+            {
+                break;
+            }
+            case "Impossible movement":
+            {
+                allowedCombination = false;
+                break;
+            }
         }
     }
 
-    if (field[playerX,playerY] == 'P')
+    if (field[playerY, playerX] == Tile.Portal)
     {
-        levelCompleted = true;
+        levelIsCompleted = true;
     }
-    return levelCompleted;
+
+    return levelIsCompleted;
 }
 
-char[,] field = ReedLevel();
-bool levelCompleted = false;
-while (!levelCompleted)
+char[,] field = ReadLevel();
+bool levelIsCompleted = false;
+while (!levelIsCompleted)
 {
     Console.Clear();
+    PrintField(field);
     char[] moves = ReadMoves();
-    levelCompleted =  PlayMoves(moves, field);
+    levelIsCompleted = PlayMoves(moves, field);
 }
-
-
