@@ -7,4 +7,12 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Content Include="bin\Debug\net6.0\draw_pinus.txt" />
+      <Content Include="bin\Debug\net6.0\level1.txt" />
+      <Content Include="bin\Debug\net6.0\level2.txt" />
+      <Content Include="bin\Debug\net6.0\level3.txt" />
+      <Content Include="bin\Debug\net6.0\playground.txt" />
+    </ItemGroup>
+
 </Project>
