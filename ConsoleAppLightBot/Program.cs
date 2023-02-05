@@ -74,7 +74,7 @@ void PrintField(char[,] field)
 
 char[] ReadMoves() 
 {
-    Console.WriteLine("Choose type of imput:");
+    Console.WriteLine("Choose type of input:");
     Console.WriteLine("1. From file");
     Console.WriteLine("2. By hands");
     int type = int.Parse(Console.ReadLine());
@@ -269,7 +269,7 @@ bool PlayMoves(char[] moves, char[,] field)
     return levelCompleted;
 }
 
-bool inGame = true;
+bool inGame;
 do
 {
     char[,] field = ReedLevel();
@@ -283,6 +283,3 @@ do
     }
     inGame = AnotherOne();
 } while (inGame);
-
-
-
